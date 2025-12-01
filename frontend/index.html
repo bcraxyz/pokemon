@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon Magik</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Bangers&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom aesthetics matching the clean, playful reference */
+        body {
+            background-color: #f3f4f6;
+            font-family: 'Inter', sans-serif;
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        .card-container {
+            perspective: 1000px;
+        }
+
+        .poke-card {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            border: 8px solid #2d3748;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+
+        .poke-card:hover {
+            transform: translateY(-5px) rotateX(2deg);
+        }
+
+        .card-image-container {
+            background: #fff;
+            position: relative;
+            overflow: hidden;
+            border: 4px solid #cbd5e1;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        /* Type-specific gradients */
+        .type-Fire { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); border-color: #fca5a5; }
+        .type-Water { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-color: #93c5fd; }
+        .type-Grass { background: linear-gradient(135deg, #22c55e 0%, #15803d 100%); border-color: #86efac; }
+        .type-Electric { background: linear-gradient(135deg, #eab308 0%, #a16207 100%); border-color: #fde047; }
+        .type-Psychic { background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%); border-color: #d8b4fe; }
+        .type-Dark { background: linear-gradient(135deg, #4b5563 0%, #1f2937 100%); border-color: #9ca3af; }
+
+        .loading-banana {
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Header -->
+    <div class="mb-8 text-center">
+        <div class="flex items-center justify-center gap-2 mb-2">
+            <div class="w-8 h-8 rounded-full bg-red-500 border-4 border-white shadow-md flex items-center justify-center">
+                <div class="w-2 h-2 bg-white rounded-full"></div>
+            </div>
+            <h1 class="text-xl font-black tracking-tighter text-gray-800">Pokémon Magik</h1>
+        </div>
+    </div>
+
+    <!-- Main Generator Form -->
+    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-12">
+        <form id="pokeForm" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <!-- Base Creature -->
+            <div class="col-span-1 md:col-span-1">
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Base Creature</label>
+                <input type="text" id="base" placeholder="e.g. Donkey Kong" value="Donkey Kong" 
+                    class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all">
+            </div>
+
+            <!-- Element -->
+            <div class="col-span-1 md:col-span-1">
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Element</label>
+                <select id="element" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all appearance-none">
+                    <option value="Fire">Fire</option>
+                    <option value="Water">Water</option>
+                    <option value="Grass">Grass</option>
+                    <option value="Electric">Electric</option>
+                    <option value="Psychic">Psychic</option>
+                    <option value="Dark">Dark</option>
+                </select>
+            </div>
+
+            <!-- Main Color -->
+            <div class="col-span-1 md:col-span-1">
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Main Color</label>
+                <select id="color" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all appearance-none">
+                    <option value="Orange">Orange</option>
+                    <option value="Blue">Blue</option>
+                    <option value="Green">Green</option>
+                    <option value="Yellow">Yellow</option>
+                    <option value="Purple">Purple</option>
+                    <option value="Black">Black</option>
+                </select>
+            </div>
+
+            <!-- Special Feature -->
+            <div class="col-span-1 md:col-span-1">
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Special Feature</label>
+                <input type="text" id="feature" placeholder="e.g. Big tie" value="Big tie, likes bananas" 
+                    class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all">
+            </div>
+        </form>
+
+        <div class="flex gap-4">
+            <button id="generateBtn" onclick="generateCard()" class="flex-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-lg font-black italic uppercase rounded-lg shadow-lg hover:shadow-xl hover:from-yellow-500 hover:to-orange-600 transition-all transform active:scale-95 py-3">
+                Create Pokémon!
+            </button>
+        </div>
+    </div>
+
+    <!-- Output Area -->
+    <div id="outputArea" class="hidden w-full max-w-sm">
+        
+        <!-- The Card -->
+        <div id="card" class="poke-card rounded-xl p-3 text-white type-Fire">
+            <div class="flex justify-between items-center mb-1 px-1">
+                <h3 id="cardName" class="font-bold text-lg tracking-wide uppercase font-['Inter']">BlazeKong</h3>
+                <div class="text-sm font-bold opacity-90"><span id="cardHp">150</span> <span class="text-xs">HP</span></div>
+            </div>
+
+            <!-- Image Area -->
+            <div class="card-image-container aspect-square bg-white rounded-lg mb-3 flex items-center justify-center">
+                <img id="cardImage" src="" alt="Pokemon" class="w-full h-full object-cover">
+            </div>
+
+            <!-- Stats/Type -->
+            <div class="bg-black/20 rounded px-2 py-1 mb-2">
+                <p id="cardType" class="text-xs font-bold text-center uppercase tracking-wider opacity-90">Fire Pokémon</p>
+            </div>
+
+            <!-- Flavor Text -->
+            <div class="bg-white/10 rounded-lg p-3 min-h-[80px]">
+                <p id="cardDesc" class="text-[10px] leading-tight opacity-90 font-medium">
+                    This fiery primate smashes with burning fists, leaving trails of embers wherever it swings.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loader" class="hidden flex-col items-center">
+        <div class="text-4xl mb-4 loading-banana">🍌</div>
+        <p class="text-gray-500 font-bold animate-pulse">Summoning Nano Banana Pro...</p>
+    </div>
+
+    <script>
+        async function generateCard() {
+            const btn = document.getElementById('generateBtn');
+            const loader = document.getElementById('loader');
+            const output = document.getElementById('outputArea');
+            const card = document.getElementById('card');
+            
+            // UI State: Loading
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            output.classList.add('hidden');
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+
+            const payload = {
+                base: document.getElementById('base').value,
+                element: document.getElementById('element').value,
+                color: document.getElementById('color').value,
+                feature: document.getElementById('feature').value
+            };
+
+            try {
+                // In production, this points to your deployed backend URL
+                // Note: This won't work in the static preview without the Python backend running
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error("Generation failed");
+
+                const data = await response.json();
+
+                // Update DOM
+                document.getElementById('cardName').innerText = data.name;
+                document.getElementById('cardHp').innerText = data.hp;
+                document.getElementById('cardType').innerText = `${data.element} Pokémon`;
+                document.getElementById('cardDesc').innerText = data.description;
+                document.getElementById('cardImage').src = `data:image/png;base64,${data.image_b64}`;
+                
+                // Update Theme based on Element
+                card.className = `poke-card rounded-xl p-3 text-white type-${data.element}`;
+
+                // Show Result
+                loader.classList.add('hidden');
+                loader.classList.remove('flex');
+                output.classList.remove('hidden');
+
+            } catch (error) {
+                console.error(error);
+                // For preview purposes only: show mock data if fetch fails
+                // DELETE THIS BLOCK IN PRODUCTION
+                setTimeout(() => {
+                    const mockData = {
+                        name: "Mockachu",
+                        hp: "120",
+                        element: payload.element,
+                        description: "Backend not connected. This is a mock response to show you the UI.",
+                        // 1x1 pixel transparent gif as placeholder
+                        image_b64: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=" 
+                    };
+                    document.getElementById('cardName').innerText = mockData.name;
+                    document.getElementById('cardHp').innerText = mockData.hp;
+                    document.getElementById('cardType').innerText = `${mockData.element} Pokémon`;
+                    document.getElementById('cardDesc').innerText = mockData.description;
+                    document.getElementById('cardImage').src = "https://placehold.co/400x400/orange/white?text=Nano+Banana+Pro";
+                    card.className = `poke-card rounded-xl p-3 text-white type-${payload.element}`;
+                    
+                    loader.classList.add('hidden');
+                    loader.classList.remove('flex');
+                    output.classList.remove('hidden');
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }, 1500);
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+    </script>
+</body>
+</html>
